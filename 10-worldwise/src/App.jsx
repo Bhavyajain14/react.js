@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="product" element={<Product />} />
-        <Route path="homepage" element={<Homepage />} />
+        <Route path="Pricing" element={<Pricing />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>

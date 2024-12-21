@@ -1,45 +1,96 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { useMapEvents } from "react-leaflet";
-import { Navigate, useNavigate } from "react-router-dom";
+import { createContext, useContext, useEffect, useReducer } from "react";
 
 const BASE_URL = "http://localhost:9000";
 
 const CityContext = createContext();
 
-function CitiesProvider({ children }) {
-  const [cities, setCities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentCity, setCurrentCity] = useState({});
+// Initial state for the reducer
+const initialState = {
+  cities: [], // List of cities
+  isLoading: false, // Loading state
+  currentCity: {}, // Currently selected city
+  error: "", // Error message
+};
 
+// Reducer function to handle state updates
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading": // When loading state is set
+      return { ...state, isLoading: true };
+
+    case "cities/loaded": // When cities are successfully loaded
+      return { ...state, isLoading: false, cities: action.payload };
+
+    case "city/loaded": // When a single city is successfully loaded
+      return { ...state, isLoading: false, currentCity: action.payload };
+
+    case "city/created": // When a new city is successfully created
+      return {
+        ...state,
+        isLoading: false,
+        cities: [...state.cities, action.payload],
+        currentCity: action.payload,
+      };
+
+    case "city/deleted": // When a city is successfully deleted
+      return {
+        ...state,
+        isLoading: false,
+        cities: state.cities.filter((city) => city.id !== action.payload),
+        currentCity: {},
+      };
+
+    case "rejected": // When an error occurs
+      return { ...state, isLoading: false, error: action.payload };
+
+    default:
+      throw new Error("Unknown Action Type");
+  }
+}
+
+// Provider component for managing cities
+function CitiesProvider({ children }) {
+  const [{ cities, isLoading, currentCity }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
+  // Fetches all cities on component mount
   useEffect(function () {
     async function fetchCities() {
+      dispatch({ type: "loading" });
       try {
-        setIsLoading(true);
         const res = await fetch(`${BASE_URL}/cities`);
         const data = await res.json();
-        setCities(data);
+        dispatch({ type: "cities/loaded", payload: data });
       } catch {
-        alert(`There is an error in fetching data`);
-      } finally {
-        setIsLoading(false);
+        dispatch({
+          type: "rejected",
+          payload: `There is an error in fetching data`,
+        });
       }
     }
     fetchCities();
   }, []);
 
+  // Fetch a single city by ID
   async function getCity(id) {
+    if (Number(id) === currentCity.id) return;
+
+    dispatch({ type: "loading" });
     try {
-      setIsLoading(true);
       const res = await fetch(`${BASE_URL}/cities/${id}`);
       const data = await res.json();
-      setCurrentCity(data);
+      dispatch({ type: "city/loaded", payload: data });
     } catch {
-      alert(`There is an error in fetching data`);
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "rejected",
+        payload: `There is an error in loading city`,
+      });
     }
   }
-  // getCity();
+
+  // Get country flag based on country code
   function getFlag(flag) {
     if (flag === undefined) return;
     let countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt())
@@ -51,35 +102,38 @@ function CitiesProvider({ children }) {
     );
   }
 
+  // Create a new city
   async function createCity(newCity) {
+    dispatch({ type: "loading" });
     try {
-      setIsLoading(true);
       const res = await fetch(`${BASE_URL}/cities`, {
         method: "POST",
         body: JSON.stringify(newCity),
         headers: { "Content-Type": "application/json" },
       });
       const data = await res.json();
-      setCities((cities) => [...cities, data]);
+      dispatch({ type: "city/created", payload: data });
     } catch {
-      alert(`There is an error in fetching data`);
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "rejected",
+        payload: `There is an error in creating city`,
+      });
     }
   }
 
+  // Delete a city by ID
   async function deleteCity(id) {
+    dispatch({ type: "loading" });
     try {
-      setIsLoading(true);
       await fetch(`${BASE_URL}/cities/${id}`, {
         method: "DELETE",
       });
-
-      setCities((cities) => cities.filter((city) => city.id !== id));
+      dispatch({ type: "city/deleted", payload: id });
     } catch {
-      alert(`There is an error in fetching data`);
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "rejected",
+        payload: `There is an error in deleting city`,
+      });
     }
   }
 
@@ -100,6 +154,7 @@ function CitiesProvider({ children }) {
   );
 }
 
+// Custom hook for accessing city context
 function useCities() {
   const context = useContext(CityContext);
   if (context === undefined)

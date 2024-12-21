@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useMapEvents } from "react-leaflet";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const BASE_URL = "http://localhost:9000";
 
@@ -49,6 +51,38 @@ function CitiesProvider({ children }) {
     );
   }
 
+  async function createCity(newCity) {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${BASE_URL}/cities`, {
+        method: "POST",
+        body: JSON.stringify(newCity),
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      setCities((cities) => [...cities, data]);
+    } catch {
+      alert(`There is an error in fetching data`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function deleteCity(id) {
+    try {
+      setIsLoading(true);
+      await fetch(`${BASE_URL}/cities/${id}`, {
+        method: "DELETE",
+      });
+
+      setCities((cities) => cities.filter((city) => city.id !== id));
+    } catch {
+      alert(`There is an error in fetching data`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <CityContext.Provider
       value={{
@@ -57,6 +91,8 @@ function CitiesProvider({ children }) {
         currentCity,
         getCity,
         getFlag,
+        createCity,
+        deleteCity,
       }}
     >
       {children}

@@ -35,42 +35,6 @@
         "lng": 13.376933665713324
       },
       "id": "98443197"
-    },
-    {
-      "id": "e4de",
-      "cityName": "Castillon-de-Saint-Martory",
-      "country": "France",
-      "emoji": "🇫🇷",
-      "date": "2024-12-21T08:39:46.137Z",
-      "notes": "good",
-      "position": {
-        "lat": "43.148414157401454",
-        "lng": "0.7936193930670357"
-      }
-    },
-    {
-      "id": "7d19",
-      "cityName": "Onsov",
-      "country": "Czechia",
-      "emoji": "🇨🇿",
-      "date": "2024-12-21T08:39:58.709Z",
-      "notes": "",
-      "position": {
-        "lat": "49.59687272147088",
-        "lng": "15.146454460262648"
-      }
-    },
-    {
-      "id": "f3c5",
-      "cityName": "Bordj Omar Driss",
-      "country": "Algeria",
-      "emoji": "🇩🇿",
-      "date": "2024-12-21T08:40:43.001Z",
-      "notes": "",
-      "position": {
-        "lat": "26.967470659731056",
-        "lng": "6.687218423952089"
-      }
     }
   ]
 }

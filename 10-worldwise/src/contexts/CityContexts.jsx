@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
+// Define the base URL for API calls
 const BASE_URL = "http://localhost:9000";
 
+// Create a context for city-related state and actions
 const CityContext = createContext();
 
 // Initial state for the reducer
@@ -48,7 +50,7 @@ function reducer(state, action) {
   }
 }
 
-// Provider component for managing cities
+// Provider component for managing city-related state and actions
 function CitiesProvider({ children }) {
   const [{ cities, isLoading, currentCity }, dispatch] = useReducer(
     reducer,
@@ -154,7 +156,7 @@ function CitiesProvider({ children }) {
   );
 }
 
-// Custom hook for accessing city context
+// Custom hook for accessing city-related state and actions
 function useCities() {
   const context = useContext(CityContext);
   if (context === undefined)
